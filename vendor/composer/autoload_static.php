@@ -6,8 +6,18 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit8932d8f03198465f527d536e5f3f60f4
 {
-    public static $fallbackDirsPsr4 = array (
-        0 => __DIR__ . '/..' . '/hcodebr/php-classes/src',
+    public static $prefixLengthsPsr4 = array (
+        'T' => 
+        array (
+            'Tagui\\' => 6,
+        ),
+    );
+
+    public static $prefixDirsPsr4 = array (
+        'Tagui\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/tagui/php-classes/src',
+        ),
     );
 
     public static $prefixesPsr0 = array (
@@ -41,7 +51,8 @@ class ComposerStaticInit8932d8f03198465f527d536e5f3f60f4
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->fallbackDirsPsr4 = ComposerStaticInit8932d8f03198465f527d536e5f3f60f4::$fallbackDirsPsr4;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit8932d8f03198465f527d536e5f3f60f4::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit8932d8f03198465f527d536e5f3f60f4::$prefixDirsPsr4;
             $loader->prefixesPsr0 = ComposerStaticInit8932d8f03198465f527d536e5f3f60f4::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit8932d8f03198465f527d536e5f3f60f4::$classMap;
 
