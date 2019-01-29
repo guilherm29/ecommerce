@@ -197,7 +197,7 @@ public static function validForgotDescrypt($code){
 		));
 		if (count($results) === 0)
 		{
-			throw new \Exception("Não foi possível recuperar a senha.");
+			throw new \Exception("Não foi possível recuperar a senha.2");
 		}
 		else
 		{
