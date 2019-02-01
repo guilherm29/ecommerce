@@ -2,7 +2,7 @@
 use Tagui\PageAdmin;
 use Tagui\Model\User;
 use Tagui\Model\Category;
-
+use Tagui\Model\Product;
 
 $app->get("/admin/categories", function(){
 	User::verifyLogin();
@@ -55,6 +55,7 @@ $app->get("/admin/categories/:idcategory", function($idcategory){
 });
 
 $app->post("/admin/categories/:idcategory", function($idcategory){
+
 	User::verifyLogin();
 
 	$category = new Category;
@@ -68,7 +69,9 @@ $app->post("/admin/categories/:idcategory", function($idcategory){
 
 });
 
-$app->get("/categories/:idcategory", function($idcategory){
+
+
+$app->get("/admin/categories/:idcategory/products", function($idcategory){
 
 	User::verifyLogin();
 
@@ -76,13 +79,55 @@ $app->get("/categories/:idcategory", function($idcategory){
 
 	$category->get((int)$idcategory);
 
-	$page = new Page();
+	$page = new PageAdmin();
 
-	$page -> setTpl("category",[
+	$page -> setTpl("categories-products",[
 
 		'category' => $category->getValues(),
-		'products'=>[]
+		'productsRelated'=> $category->getProducts(),
+		'productsNotRelated'=>$category->getProducts(false)
 	]);
+});
+
+
+$app->get("/admin/categories/:idcategory/products/:idproduct/add", function($idcategory, $idproduct){
+
+	User::verifyLogin();
+
+	$category = new Category;
+
+	$category->get((int)$idcategory);
+
+	$product = new Product();
+
+	$product ->get((int)$idproduct);
+
+	$category-> addProduct($product);
+
+	header("Location: /admin/categories/" . $idcategory . "/products");
+	exit;
+
+	
+});
+
+$app->get("/admin/categories/:idcategory/products/:idproduct/remove", function($idcategory, $idproduct){
+
+	User::verifyLogin();
+
+	$category = new Category;
+
+	$category->get((int)$idcategory);
+
+	$product = new Product();
+
+	$product ->get((int)$idproduct);
+
+	$category-> removeProduct($product);
+
+	header("Location: /admin/categories/" . $idcategory . "/products");
+	exit;
+
+	
 });
 
 ?>
