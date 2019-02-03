@@ -111,11 +111,34 @@ public function getProducts($related = true)
         $sql -> query ("delete from tb_productscategories where idcategory = :idcategory and  idproduct = :idproduct",[
             ':idcategory'=> $this->getidcategory(),
             ':idproduct'=>$product->getidproduct()
-        ]
-    
-    );
+        ]);
     }
 
+    public function getProductsPage($page = 1, $itemsPerpage = 8)
+    {
+        $start = ($page - 1) * $itemsPerpage;
+        $sql = new Sql();
+
+        $results = $sql ->select("
+
+        select sql_calc_found_rows*
+        from tb_products a
+        inner join tb_productscategories b on a.idproduct = b.idproduct
+        inner join tb_categories c on c.idcategory = b.idcategory
+        where c.idcategory = :idcategory
+        limit $start, $itemsPerpage;
+        
+        ",[
+            ":idcategory"=>$this->getidcategory()
+        ]);
+
+        $resultTotal = $sql ->select ("select found_rows() as nrtotal;");
+
+        return ['data' => Product :: checkList($results),
+                'total' =>(int) $resultTotal[0]['nrtotal'],
+                'pages' => ceil($resultTotal[0]['nrtotal'] / $itemsPerpage)
+    ];
+    }
 
 }//fim
 ?>
