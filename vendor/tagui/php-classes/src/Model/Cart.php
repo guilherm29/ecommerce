@@ -76,6 +76,50 @@ class Cart extends Model{
         
         $this->setData($result[0]);
     }
+
+
+    public function addProduct(Product $product)
+    {
+        $sql = new Sql();
+        $sql->query("insert into tb_cartsproducts (idcart, idproduct) values (:idcart, :idproduct)",[
+            ':idcart' => $this->getidcart(),
+            ':idproduct' => $product->getidproduct()
+        ]);
+    }
+
+    public function removeProduct(Product $product, $all = false)
+    {
+        $sql = new Sql();
+        if($all){
+
+            $sql->query("update tb_cartsproducts set dtremoved = now() where idcart= :idcart and idproduct = :idproduct and
+            dtremoved is null" ,[
+                ':idcart' => $this->getidcart(),
+                ':idproduct' => $product->getidproduct()
+        ]);
+        }else {
+            $sql->query("update tb_cartsproducts set dtremoved = now() where idcart= :idcart and idproduct = :idproduct and 
+            dtremoved is null limit 1",[
+                ':idcart' => $this->getidcart(),
+                ':idproduct' => $product->getidproduct()
+        ]);
+        }
+    }
+
+    public function getProducts()
+    {
+        $sql = new Sql();
+
+        return Product :: checklist( $sql->select("
+        SELECT b.idproduct, b.desproduct , b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl, COUNT(*) AS nrqtd, SUM(b.vlprice) AS vltotal 
+			FROM tb_cartsproducts a 
+			INNER JOIN tb_products b ON a.idproduct = b.idproduct 
+			WHERE a.idcart = :idcart AND a.dtremoved IS NULL 
+			GROUP BY b.idproduct, b.desproduct , b.vlprice, b.vlwidth, b.vlheight, b.vllength, b.vlweight, b.desurl 
+			ORDER BY b.desproduct", [
+            'idcart' => $this->getidcart()
+        ]));
+    }
     
 }//fim
 ?>
