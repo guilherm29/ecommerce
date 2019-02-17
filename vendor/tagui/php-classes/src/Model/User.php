@@ -161,12 +161,10 @@ public function delete(){
     ));
 }
 
-
-
-public static function getForgot($email){
-
-    $sql = new Sql();
-    $results = $sql->select("
+public static function getForgot($email, $inadmin = true)
+	{
+		$sql = new Sql();
+		$results = $sql->select("
 			SELECT *
 			FROM tb_persons a
 			INNER JOIN tb_users b USING(idperson)
@@ -174,51 +172,46 @@ public static function getForgot($email){
 		", array(
 			":email"=>$email
 		));
-     
-     
-
-     if(count($results) ===0)
-     {
-         throw new \Exception("Não foi possivel recuperar a senha");
-     }else
-     {
-         $data = $results[0];
-         $results2 = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", array(
-            ":iduser"=>$data["iduser"],
-            ":desip"=>$_SERVER["REMOTE_ADDR"]
-        ));
- 
-        
-        if (count($results2)===0 ) {
-            throw new \Exception("Não foi possivel recuperar a senha");
-
-        }else
-            $dataRecovery = $results2[0];
-
-            $code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
+		if (count($results) === 0)
+		{
+			throw new \Exception("Não foi possível recuperar a senha.");
 			
-                ////fim
-            $link = "http://www.taguitecnologia.com.br/admin/forgot/reset?code=$code";
-          ;
-           $mailer = new Mailer($data["desemail"], $data["desperson"], "Redefinir Senha da Tagui Store", "forgot", array(
-            "name"=>$data["desperson"],
-            "link"=>$link
-        ));
-        
-        $mailer->send();
-
-        return $data;
-        
-     }
-}
-
-public static function validForgotDescrypt($code){
-   
-    $idrecovery = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, User::SECRET, base64_decode($code), MCRYPT_MODE_ECB);
-
-    $sql = new Sql();
-
-	$results = $sql->select("
+		}
+		else
+		{
+			$data = $results[0];
+			$results2 = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", array(
+				":iduser"=>$data["iduser"],
+				":desip"=>$_SERVER["REMOTE_ADDR"]
+			));
+			if (count($results2) === 0)
+			{
+				throw new \Exception("Não foi possível recuperar a senha");
+			}
+			else
+			{
+				$dataRecovery = $results2[0];
+				$code = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_128, User::SECRET, $dataRecovery["idrecovery"], MCRYPT_MODE_ECB));
+				if ($inadmin === true) {
+					
+					$link = "http://www.taguitecnologia.com.br/admin/forgot/reset?code=$code";
+				} else {
+					$link = "http://www.taguitecnologia.com.br/forgot/reset?code=$code";
+				}
+				$mailer = new Mailer($data["desemail"], $data["desperson"], "Redefinir Senha da Hcode Store", "forgot", array(
+					"name"=>$data["desperson"],
+					"link"=>$link
+				));
+				$mailer->send();
+				return $data;
+			}
+		}
+	}
+	public static function validForgotDescrypt($code)
+	{
+		$idrecovery = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, User::SECRET, base64_decode($code), MCRYPT_MODE_ECB);
+		$sql = new Sql();
+		$results = $sql->select("
 			SELECT * 
 			FROM tb_userspasswordsrecoveries a
 			INNER JOIN tb_users b USING(iduser)
@@ -234,14 +227,14 @@ public static function validForgotDescrypt($code){
 		));
 		if (count($results) === 0)
 		{
-			throw new \Exception("Não foi possível recuperar a senha.2");
+			throw new \Exception("Não foi possível recuperar a senha.");
 		}
 		else
 		{
 			return $results[0];
 		}
-    }
-    
+	}
+
 public static function setFogotUsed($idrecovery)
 {
 		$sql = new Sql();

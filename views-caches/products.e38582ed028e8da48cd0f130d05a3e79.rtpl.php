@@ -22,6 +22,15 @@
               <a href="/admin/products/create" class="btn btn-success">Cadastrar Produto</a>
             </div>
 
+            <?php if( $error != '' ){ ?>
+
+            <div class="alert alert-danger">
+                <?php echo htmlspecialchars( $error, ENT_COMPAT, 'UTF-8', FALSE ); ?>
+
+            </div>
+            <?php } ?>
+
+
             <div class="box-body no-padding">
               <table class="table table-striped">
                 <thead>

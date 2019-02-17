@@ -49,7 +49,7 @@ public function delete(){
         ":idcategory" => $this->getidcategory()
     ]);
 
-    Catefory :: updatefile();
+    Category :: updatefile();
 }
 
 public static function updatefile(){

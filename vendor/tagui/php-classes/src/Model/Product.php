@@ -5,6 +5,7 @@ use \Tagui\Model;
 
 class Product extends Model{
 
+    const ERROR = "ProductError";
     
 
     public static function listAll(){
@@ -28,7 +29,11 @@ class Product extends Model{
  
     public function save(){
 
+       
         $sql = new Sql();
+        $aux = $sql->select("SELECT MAX(idproduct) FROM tb_products");
+        
+        
 		$results = $sql->select("CALL sp_products_save(:idproduct, :desproduct, :vlprice, :vlwidth, :vlheight, :vllength, :vlweight, :desurl)", array(
 			":idproduct"=>$this->getidproduct(),
 			":desproduct"=>$this->getdesproduct(),
@@ -37,8 +42,10 @@ class Product extends Model{
 			":vlheight"=>$this->getvlheight(),
 			":vllength"=>$this->getvllength(),
 			":vlweight"=>$this->getvlweight(),
-			":desurl"=>$this->getdesurl()
-		));
+			":desurl"=>( 1+(int)$aux[0]["MAX(idproduct)"])
+        ));
+        
+        
 		$this->setData($results[0]);
 
     }
@@ -54,15 +61,33 @@ class Product extends Model{
 
     }
 
-public function delete()
-{
-
-    
-    $sql = new Sql();
-    $sql->query("DELETE FROM tb_products WHERE idproduct = :idproduct", [
-        ':idproduct'=>$this->getidproduct()
-    ]);
-}
+    public function delete()
+	{
+        try{
+        $id = $this->getidproduct();
+        
+		$sql = new Sql();
+		$results = $sql->query("DELETE FROM tb_products WHERE idproduct = :idproduct", [
+			':idproduct'=>$this->getidproduct()
+        ]);
+        if ($results){
+            if (file_exists(
+                $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 
+                "res" . DIRECTORY_SEPARATOR . 
+                "site" . DIRECTORY_SEPARATOR . 
+                "img" . DIRECTORY_SEPARATOR . 
+                "products" . DIRECTORY_SEPARATOR . 
+                $this->getidproduct() . ".jpg"
+                )) {
+                $url = "res/site/img/products/" . $id . ".jpg";
+            }
+            unlink($url);
+        }
+    } catch (Exception $e) {
+        Product ::setError("Ocorreu um erro, possivelmente o produto: '". $this->getdesproduct() ."' está relacionado com uma categoria.");
+    }
+        
+	}
 public function checkPhoto()
 	{
 		if (file_exists(
@@ -90,6 +115,7 @@ public function getValues()
 
 public function setPhoto($file)
 {
+    $image= "";
     $extension = explode('.', $file['name']);
     $extension = end($extension);
 
@@ -149,6 +175,20 @@ public function getCategories()
     ]);
 }
 
+public static function setError($msg)
+{
+    $_SESSION[Product::ERROR] = $msg;
+}
+public static function getError()
+{
+    $msg = (isset($_SESSION[Product::ERROR]) && $_SESSION[Product::ERROR]) ? $_SESSION[Product::ERROR] : '';
+    Product::clearError();
+    return $msg;
+}
+public static function clearError()
+{
+    $_SESSION[Product::ERROR] = NULL;
+}
 
 
 

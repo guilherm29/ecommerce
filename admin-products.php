@@ -10,9 +10,9 @@ $app->get('/admin/products', function() {
     $products = Product :: listAll();
 
    $page = new PageAdmin();
-
    $page -> setTpl("products",[
-       "products" => $products
+       "products" => $products,
+       'error'=>Product::getError()
    ]);
 });
 
@@ -80,9 +80,9 @@ $app->get('/admin/products/:idproduct/delete', function($idproduct) {
     User::verifyLogin();
 
 
-   $product = new Product();
+   $product = new Product(); 
 
-   $product->get((int) $idproduct);
+   $product->get((int)$idproduct);
 
    $product->delete();
 
