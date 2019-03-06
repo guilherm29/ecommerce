@@ -72,7 +72,7 @@ class Cart extends Model{
 			':deszipcode'=>$this->getdeszipcode(),
 			':vlfreight'=>$this->getvlfreight(),
 			':nrdays'=>$this->getnrdays()
-		]);
+        ]);
 		$this->setData($results[0]);
 	}
 
@@ -252,4 +252,4 @@ public function getCalculateTotal()
 
 
 }//fim
-?>
+?> -->

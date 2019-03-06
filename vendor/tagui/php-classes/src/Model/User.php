@@ -10,7 +10,9 @@ class User extends Model{
     const SECRET = "Tagui_php_Secret";
     const SESSION_ERROR = "UserError";
     const ERROR = "UserError";
-    const ERROR_REGISTER = "UserErrorRegister";
+	const ERROR_REGISTER = "UserErrorRegister";
+	const SUCCESS = "UserSuccess";
+
     public static function getFromSession()
     {
         $user = new User();
@@ -114,9 +116,11 @@ class User extends Model{
            ":desemail" =>$this -> getdesemail(),
            ":nrphone" =>$this -> getnrphone(),
            ":inadmin" =>$this -> getinadmin()
-        ));
+		));
+		
 
-        $this-> setData($result[0]);
+		$this-> setData($result[0]);
+		$this->update();
 
     }
 
@@ -133,22 +137,22 @@ class User extends Model{
         $this->setData($results[0]);
     }
 
-public function update($iduser)
+public function update()
 {
     
     $sql = new Sql();
     $results = $sql -> select("CALL sp_usersupdate_save(:iduser, :desperson, :deslogin, :despassword,:desemail, :nrphone, :inadmin)", array(
        
         ":iduser" =>$this->getiduser(),
-        ":desperson" => $this -> getdesperson(),
-       ":deslogin" =>$this -> getdeslogin(),
-       ":despassword" =>$this ->User::getPasswordHash(getdespassword()),
-       ":desemail" =>$this -> getdesemail(),
-       ":nrphone" =>$this -> getnrphone(),
-       ":inadmin" =>$this -> getinadmin()
+        ":desperson" =>utf8_decode( $this->getdesperson()),
+       ":deslogin" =>$this->getdeslogin(),
+       ":despassword" =>User::getPasswordHash($this->getdespassword()),
+       ":desemail" =>$this->getdesemail(),
+       ":nrphone" =>$this->getnrphone(),
+       ":inadmin" =>$this->getinadmin()
     ));
 
-    $this-> setData($results[0]);
+    $this->setData($results[0]);	
 
 }
 
@@ -270,7 +274,7 @@ public function setPassword($password)
     public static function getPasswordHash($password)
 	{
 		return password_hash($password, PASSWORD_DEFAULT, [
-			'cost'=>12
+			"cost" => 12
 		]);
 	}
 
@@ -298,6 +302,20 @@ public function setPassword($password)
 		return (count($results) > 0);
 	}
 
+	public static function setSuccess($msg)
+	{
+		$_SESSION[User::SUCCESS] = $msg;
+	}
+	public static function getSuccess()
+	{
+		$msg = (isset($_SESSION[User::SUCCESS]) && $_SESSION[User::SUCCESS]) ? $_SESSION[User::SUCCESS] : '';
+		User::clearSUCCESS();
+		return $msg;
+	}
+	public static function clearSuccess()
+	{
+		$_SESSION[User::SUCCESS] = NULL;
+	}
 
 }//fim
 

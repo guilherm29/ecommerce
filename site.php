@@ -8,7 +8,7 @@ use \Tagui\Model\User;
 use \Tagui\Model\Address;
 
 $app->get('/', function() {
-   
+    
 	$products = Product::listAll();
 
 	$page = new Page();
@@ -142,8 +142,23 @@ $app->post('/cart/freight', function() {
 $app->get('/checkout', function() {
 
 	User::verifyLogin(false);
-	$cart = Cart::getFromSession();
 	$address = new Address();
+	$cart = Cart::getFromSession();
+
+	if(isset($_GET['zipcode'])) {
+
+		$address->loadFromCEP($_GET['zipcode']);
+
+		$cart -> setdeszipcode($_GET['zipcode']);
+
+		$cart-> save();
+
+		$cart->getCalculateTotal();
+
+	}
+
+	
+	
 	$page = new Page();
 
 	$page -> setTpl("checkout",[
@@ -151,6 +166,8 @@ $app->get('/checkout', function() {
 		'address'=>$address->getValues()
 	]);
 });
+
+// $app->post('/checkout', function);
 
 $app->get('/login', function() {
 
@@ -295,6 +312,61 @@ $app->post("/forgot/reset", function(){
 	$page = new Page();
 
 	$page -> setTpl("forgot-reset-success");
+});
+
+
+$app->get("/profile", function(){
+	
+	User::verifyLogin(false);
+	$user = User::getFromSession();
+
+	$page = new Page();
+
+	$page -> setTpl("profile",[
+		'user' =>$user->getValues(),
+		'profileMsg' => User::getSuccess(),
+		'profileError'=>User::getError()
+
+	]);
+});
+
+
+$app->post("/profile", function(){
+	
+	User::verifyLogin(false);
+
+	
+	if (!isset($_POST['desperson']) || $_POST['desperson'] === '') {
+		User::setError("Preencha o seu nome.");
+		header('Location: /profile');
+		exit;
+	}
+	if (!isset($_POST['desemail']) || $_POST['desemail'] === '') {
+		User::setError("Preencha o seu e-mail.");
+		header('Location: /profile');
+		exit;
+	}
+	$user = User::getFromSession();
+	if ($_POST['desemail'] !== $user->getdesemail()) {
+		if (User::checkLoginExists($_POST['desemail']) === true) {
+			User::setError("Este endereço de e-mail já está cadastrado.");
+			header('Location: /profile');
+			exit;
+		}
+	}
+
+	$_POST['inadmin'] = $user->getinadmin();
+	$_POST['despassword'] = $user->getdespassword();
+	$_POST['deslogin'] = $_POST['desemail'];
+
+	$user->setData($_POST);
+
+	$user->update();
+
+	User::SetSuccess("Dados alterados com sucesso");
+
+	header("Location: /profile");
+	exit;
 });
 
 
