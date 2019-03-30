@@ -239,13 +239,12 @@ public function getValues()
 }
 
 public function getCalculateTotal()
-{
-    $totals = $this->getProductsTotals();
-
-    $this->setvlsubtotal($totals['vlprice']);
-    $this->setvltotal($totals['vlprice'] + $this->getvlfreight());
-
-}
+	{
+		$this->updateFreight();
+		$totals = $this->getProductsTotals();
+		$this->setvlsubtotal($totals['vlprice']);
+		$this->setvltotal($totals['vlprice'] + (float)$this->getvlfreight());
+	}
 
 
 
