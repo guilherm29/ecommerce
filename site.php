@@ -468,6 +468,7 @@ $dias_de_prazo_para_pagamento = 10;
 $taxa_boleto = 5.00;
 $data_venc = date("d/m/Y", time() + ($dias_de_prazo_para_pagamento * 86400));  // Prazo de X dias OU informe data: "13/04/2006"; 
 $valor_cobrado = formatPrice($order->getvltotal()); // Valor - REGRA: Sem pontos na milhar e tanto faz com "." ou "," ou com 1 ou 2 ou sem casa decimal
+$valor_cobrado = str_replace(".", "",$valor_cobrado);
 $valor_cobrado = str_replace(",", ".",$valor_cobrado);
 $valor_boleto=number_format($valor_cobrado+$taxa_boleto, 2, ',', '');
 
@@ -491,7 +492,7 @@ $dadosboleto["demonstrativo3"] = "";
 $dadosboleto["instrucoes1"] = "- Sr. Caixa, cobrar multa de 2% após o vencimento";
 $dadosboleto["instrucoes2"] = "- Receber até 10 dias após o vencimento";
 $dadosboleto["instrucoes3"] = "- Em caso de dúvidas entre em contato conosco: suporte@taguistore.com.br";
-$dadosboleto["instrucoes4"] = "&nbsp; Emitido pelo sistema taguistore E-commerce - www.taguistore.com.br";
+$dadosboleto["instrucoes4"] = "&nbsp; Emitido pelo sistema tagui store E-commerce - www.taguistore.com.br";
 
 // DADOS OPCIONAIS DE ACORDO COM O BANCO OU CLIENTE
 $dadosboleto["quantidade"] = "";
@@ -525,4 +526,30 @@ require_once($path . "funcoes_itau.php");
 require_once($path . "layout_itau.php");
 
 });
+
+$app->get("/profile/orders", function(){
+	User::verifyLogin(false);
+	$user = User::getFromSession();
+	$page = new Page();
+	$page->setTpl("profile-orders", [
+		'orders'=>$user->getOrders()
+	]);
+});
+
+$app->get("/profile/orders/:idorder",function($idorder){
+	User::verifyLogin(false);
+	$order = new order();
+	$order->get((int)$idorder);
+	$cart = new Cart();
+	$cart->get((int)$order->getidcart());
+	$cart->getCalculateTotal();
+	$page = new Page();
+	$page->setTpl("profile-orders-detail",[
+		'order'=>$order->getValues(),
+		'cart'=>$cart->getValues(),
+		'products'=>$cart->getProducts()
+		
+	]);
+});
+
 ?>
