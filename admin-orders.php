@@ -5,7 +5,6 @@ use \Tagui\Model\Model;
 use \Tagui\Model\User;
 use \Tagui\Model\Order;
 use \Tagui\Model\OrderStatus;
-
 $app->get("/admin/orders/:idorder/status", function($idorder){
 	User::verifyLogin();
 	$order = new Order();
@@ -18,7 +17,6 @@ $app->get("/admin/orders/:idorder/status", function($idorder){
 		'msgError'=>Order::getError()
 	]);
 });
-
 $app->post("/admin/orders/:idorder/status", function($idorder){
 	User::verifyLogin();
 	if (!isset($_POST['idstatus']) || !(int)$_POST['idstatus'] > 0) {
@@ -34,49 +32,51 @@ $app->post("/admin/orders/:idorder/status", function($idorder){
 	header("Location: /admin/orders/".$idorder."/status");
 	exit;
 });
-
 $app->get("/admin/orders/:idorder/delete", function($idorder){
-
-    User::verifyLogin();
-    
-    $order = new Order();
-    
-    $order->get((int)$idorder);
-    
-    $order->delete();
-    
+	User::verifyLogin();
+	$order = new Order();
+	$order->get((int)$idorder);
+	$order->delete();
 	header("Location: /admin/orders");
 	exit;
 });
-
 $app->get("/admin/orders/:idorder", function($idorder){
-
-    User::verifyLogin();
-    
-    $order = new Order();
-    
-    $order->get((int)$idorder);
-    
-    $cart = $order->getCart();
-    
-    $page = new PageAdmin();
-    
+	User::verifyLogin();
+	$order = new Order();
+	$order->get((int)$idorder);
+	$cart = $order->getCart();
+	$page = new PageAdmin();
 	$page->setTpl("order", [
 		'order'=>$order->getValues(),
 		'cart'=>$cart->getValues(),
 		'products'=>$cart->getProducts()
 	]);
 });
-
-
 $app->get("/admin/orders", function(){
 	User::verifyLogin();
+	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
+	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
+	if ($search != '') {
+		$pagination = Order::getPageSearch($search, $page);
+	} else {
+		$pagination = Order::getPage($page);
+	}
+	$pages = [];
+	for ($x = 0; $x < $pagination['pages']; $x++)
+	{
+		array_push($pages, [
+			'href'=>'/admin/orders?'.http_build_query([
+				'page'=>$x+1,
+				'search'=>$search
+			]),
+			'text'=>$x+1
+		]);
+	}
 	$page = new PageAdmin();
 	$page->setTpl("orders", [
-		'orders'=>Order::listAll()
+		"orders"=>$pagination['data'],
+		"search"=>$search,
+		"pages"=>$pages
 	]);
 });
-
-
-
 ?>

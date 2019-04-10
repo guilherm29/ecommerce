@@ -28,11 +28,11 @@
             <div class="col-sm-4 invoice-col">
             De
             <address>
-                <strong>HCODE</strong><br>
-                Rua Ademar Saraiva Leão, 234 - Alvarenga<br>
-                São Bernardo do Campo - SP<br>
-                Telefone: (11) 3171-3080<br>
-                E-mail: suporte@hcode.com.br
+                <strong>Tagui</strong><br>
+                Rua Passos, 234 - Passos<br>
+                MG<br>
+                Telefone: (35) 99133-8357<br>
+                E-mail: suporte@tagio.com.br
             </address>
             </div>
             <!-- /.col -->

@@ -3,7 +3,6 @@ use Tagui\PageAdmin;
 use Tagui\Model\User;
 use Tagui\Model\Category;
 use Tagui\Model\Product;
-
 $app->get("/admin/categories", function(){
 	User::verifyLogin();
 	$search = (isset($_GET['search'])) ? $_GET['search'] : "";
